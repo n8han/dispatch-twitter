@@ -123,6 +123,9 @@ object Account extends
    /** authenticated user rate limit status */
    def rate_limit_status_as(consumer: Consumer, token: Token) =
      this / "rate_limit_status.json" <@(consumer, token) ># obj
+   /** authenticated user verify credentials **/
+   def verify_credentials_as(consumer: Consumer, accessToken: Token) =
+     (this / "verify_credentials.json").secure <@(consumer, accessToken) ># obj
 }
 
 object RateLimitStatus extends Js {
