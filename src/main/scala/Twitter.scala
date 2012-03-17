@@ -76,8 +76,6 @@ case class Status(user_id: String) extends
   def timeline = this ># (list ! obj)
 }
 
-object User extends UserProps with Js // Js assigns context of None
-
 trait UserProps {
   // undefined local context for `?` to allow Obj / Js to assign themselves
   implicit val ctx: Option[Obj]
@@ -85,10 +83,37 @@ trait UserProps {
   val screen_name = 'screen_name ? str
 }
 
-case class User(user: String) extends
-    Request(Twitter.host / "users" / "show" / (user + ".json")) with Js {
+object Users extends 
+    Request(Twitter.host / "users") with Js with UserProps {
 
-  def show = this ># obj
+  def show(screenName: String) =
+    this / "show" / (screenName + ".json") ># obj
+
+  def lookup_by_id(ids: List[BigDecimal], includeEntities: Boolean = false) =
+    this / "lookup.json" <<? Map("user_id" -> ids.mkString(","), "include_entities" -> includeEntities.toString) ># (list ! obj)
+
+  def lookup_by_id_as(ids: List[BigDecimal], consumer: Consumer, token: Token, includeEntities: Boolean = false) =
+    this / "lookup.json" <<? Map("user_id" -> ids.mkString(","), "include_entities" -> includeEntities.toString) <@ (consumer, token) ># (list ! obj)
+
+  val statuses_count = 'statuses_count ? num
+  val friends_count = 'friends_count ? num
+  val created_at = 'created_at ? str
+  val default_profile_image = 'default_profile_image ? bool
+  val lang = 'lang ? str
+}
+
+object Followers extends
+    Request(Twitter.host / "followers" / "ids.json") with Js {
+
+  def get(user: String, cursor: BigDecimal = -1) =
+    this <<? Map("screen_name" -> user, "cursor" -> cursor.toString)
+
+  def get_as(user: String, consumer: Consumer, token: Token, cursor: BigDecimal = -1) =
+    this <<? Map("screen_name" -> user, "cursor" -> cursor.toString) <@ (consumer, token)
+
+  val previousCursor = 'previous_cursor ? num
+  val nextCursor = 'next_cursor ? num
+  val ids = 'ids ? list
 }
 
 object Account extends
