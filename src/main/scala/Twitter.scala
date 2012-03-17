@@ -8,7 +8,7 @@ import oauth.OAuth._
 import dispatch.Request._
 
 object Twitter {
-  val host = :/("api.twitter.com")
+  val host = :/("api.twitter.com") / "1"
   val search = :/("search.twitter.com")
 }
 
@@ -42,7 +42,7 @@ object Search extends Js {
   val from_user = 'from_user ? str
 }
 
-object Status extends Request(Twitter.host / "1" / "statuses") {
+object Status extends Request(Twitter.host / "statuses") {
   private def public_timeline = this / "public_timeline.json" ># (list ! obj)
 
   def friends_timeline(consumer: Consumer, token: Token, params: (String, String)*) =
