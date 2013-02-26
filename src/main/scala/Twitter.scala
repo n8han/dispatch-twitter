@@ -134,3 +134,22 @@ object RateLimitStatus extends Js {
   val hourly_limit = 'hourly_limit ? num
   val reset_time = 'reset_time ? str
 }
+
+
+object Favorite extends Js {
+  val retweeted = 'retweeted ? bool
+  val text = 'text ? str
+  val user = new Obj('user) with UserProps // Obj assigns context to itself
+}
+
+object Favorites extends 
+  Request(Twitter.host / "favorites.json") with Js {
+
+  class FavoritesBuilder(consumer: Consumer, token: Token, user: String, count: Int) extends Builder[Handler[List[JsObject]]] {
+    def product = Favorites <<? Map("screen_name" -> user, "count" -> count.toString) <@(consumer,token) ># (list ! obj)
+  }
+ 
+  def get( consumer: Consumer, accessToken: Token, user: String, count: Int) =
+    new FavoritesBuilder( consumer, accessToken, user, count )
+
+}
